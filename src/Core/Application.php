@@ -8,7 +8,7 @@ use Elrond\Terminal\Terminal;
 
 class Application
 {
-    const NUMBER_OF_LINES_TO_READ = 20;
+    const NUMBER_OF_LINES_TO_READ = 50;
     const TIMESTAMP_FORMAT = 'Y-m-d H:i:s';
     const PROMPT = '[Q]uit, [R]efresh, <Line Number>: ';
     const COMMAND_NOT_FOUND = 'Unrecognized Command';
@@ -76,9 +76,16 @@ class Application
     {
         $logMessage = new LogMessage($line);
         $t->pl($logMessage->getTimestamp()->format(static::TIMESTAMP_FORMAT));
-        $arrMessage = explode('\n', $logMessage->getMessage());
+        $arrMessage = explode("\\n", $logMessage->getMessage());
         foreach ($arrMessage as $msgLine) {
             $t->pl($msgLine);
+        }
+        if ($logMessage->hasStackTrace()) {
+            $arrStackTrace = explode("\\n", $logMessage->getStackTrace());
+
+            foreach ($arrStackTrace as $traceLine) {
+                $t->pl($traceLine);
+            }
         }
     }
 
