@@ -12,12 +12,15 @@ class LogMessage
 
     private $stackTrace = '';
 
+    private $errorType;
+
     public function __construct(string $logLine)
     {
         $json = json_decode($logLine, true);
         $this
             ->setTimestamp($json['@timestamp'])
-            ->setMessage($json['@message']);
+            ->setMessage($json['@message'])
+            ->setErrorType($json['@message']);
         if (isset($json['@fields']['ctxt_trace'])) {
             $this->setStackTrace($json['@fields']['ctxt_trace']);
         }
@@ -62,5 +65,21 @@ class LogMessage
     public function hasStackTrace(): bool
     {
         return !empty($this->stackTrace);
+    }
+
+    private function setErrorType($message): self
+    {
+        if (strpos('Error-Code: ', $message) === 0) {
+            $this->errorType = substr($message, 0, 44);
+        } else {
+            $this->errorType = substr($message, 0, strpos($message, ' - '));
+        }
+
+        return $this;
+    }
+
+    public function getErrorType(): string
+    {
+        return $this->errorType;
     }
 }

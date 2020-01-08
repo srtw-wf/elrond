@@ -76,7 +76,10 @@ class Application
     {
         $logMessage = new LogMessage($line);
         $t->pl($logMessage->getTimestamp()->format(static::TIMESTAMP_FORMAT));
-        $arrMessage = explode("\\n", $logMessage->getMessage());
+        $t->pl($logMessage->getErrorType());
+        $msg = substr($logMessage->getMessage(), mb_strlen($logMessage->getErrorType()));
+
+        $arrMessage = explode("\\n", $msg);
         foreach ($arrMessage as $msgLine) {
             $t->pl($msgLine);
         }
