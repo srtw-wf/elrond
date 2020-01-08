@@ -46,7 +46,7 @@ class LogFile
 
         $cursor = -1;
 
-        for ($i = 0; $i < $x; $i++) {
+        for ($i = 0; $i <= $x; $i++) {
             $line = $this->readToStartOfLine($fh, $cursor);
             if (!empty($line)) {
                 $result[] = $line;
