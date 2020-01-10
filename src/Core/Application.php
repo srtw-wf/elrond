@@ -8,16 +8,20 @@ use Elrond\Terminal\Terminal;
 
 class Application
 {
-    const NUMBER_OF_LINES_TO_READ = 20;
-    const TIMESTAMP_FORMAT = 'Y-m-d H:i:s';
-    const PROMPT = '[Q]uit, [R]efresh, <Line Number>:';
-    const COMMAND_NOT_FOUND = 'Unrecognized Command';
-    const HELP = 'Usage: logreader <filename>';
+    private const NUMBER_OF_LINES_TO_READ = 20;
+    private const TIMESTAMP_FORMAT = 'Y-m-d H:i:s';
+
+    private const PROMPT_CALL_TO_ACTION = '[Q]uit, [R]efresh, <Line Number>:';
+    private const PROMPT_COMMAND_NOT_FOUND = 'Unrecognized Command';
+    private const PROMPT_HELP = 'Usage: logreader <filename>';
+
+    private const COMMAND_REFRESH = 'r';
+    private const COMMAND_QUIT = 'q';
 
     public static function execute(array $arguments, int $numberOfArguments)
     {
         $t = new Terminal();
-        if (!isset($arguments[1])) {
+        if (!isset($arguments[1]) || $numberOfArguments <> 2) {
             static::showHelpMessage($t);
             exit(0);
         }
@@ -29,9 +33,10 @@ class Application
 
         $logFile = new LogFile($filename);
 
-        $input = 'r';
-        while ($input !== 'q') {
-            if ($input == 'r') {
+        $lines = [];
+        $input = static::COMMAND_REFRESH;
+        while ($input !== static::COMMAND_QUIT) {
+            if ($input == static::COMMAND_REFRESH) {
                 $lines = $logFile->getLastXLines(static::NUMBER_OF_LINES_TO_READ);
                 static::showLastMessages($t, $lines);
             } else if (is_int((int)$input) && $input > 0 && $input <= count($lines)) {
@@ -43,7 +48,6 @@ class Application
             self::showPrompt($t);
             $input = mb_strtolower(readline());
         }
-
     }
 
     public static function showLastMessages(Terminal $t, array $lines)
@@ -69,8 +73,8 @@ class Application
 
     public static function showPrompt(Terminal $t)
     {
-        $t->pl(str_repeat('_', mb_strlen(static::PROMPT)));
-        $t->pl(static::PROMPT);
+        $t->pl(str_repeat('_', mb_strlen(static::PROMPT_CALL_TO_ACTION)));
+        $t->pl(static::PROMPT_CALL_TO_ACTION);
     }
 
     public static function showDetailedMessage(Terminal $t, string $line)
@@ -95,11 +99,11 @@ class Application
 
     public static function showCommandNotFoundNotification(Terminal $t)
     {
-        $t->pl(self::COMMAND_NOT_FOUND);
+        $t->pl(self::PROMPT_COMMAND_NOT_FOUND);
     }
 
     public static function showHelpMessage(Terminal $t)
     {
-        $t->pl(static::HELP);
+        $t->pl(static::PROMPT_HELP);
     }
 }
