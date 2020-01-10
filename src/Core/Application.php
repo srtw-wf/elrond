@@ -8,13 +8,19 @@ use Elrond\Terminal\Terminal;
 
 class Application
 {
-    const NUMBER_OF_LINES_TO_READ = 50;
+    const NUMBER_OF_LINES_TO_READ = 20;
     const TIMESTAMP_FORMAT = 'Y-m-d H:i:s';
-    const PROMPT = '[Q]uit, [R]efresh, <Line Number>: ';
+    const PROMPT = '[Q]uit, [R]efresh, <Line Number>:';
     const COMMAND_NOT_FOUND = 'Unrecognized Command';
+    const HELP = 'Usage: logreader <filename>';
 
-    public static function execute(array $arguments)
+    public static function execute(array $arguments, int $numberOfArguments)
     {
+        $t = new Terminal();
+        if (!isset($arguments[1])) {
+            static::showHelpMessage($t);
+            exit(0);
+        }
         $filename = $arguments[1];
 
         if (!file_exists($filename)) {
@@ -22,14 +28,8 @@ class Application
         }
 
         $logFile = new LogFile($filename);
-        $lines = $logFile->getLastXLines(static::NUMBER_OF_LINES_TO_READ);
 
-        $t = new Terminal();
-
-
-        static::showLastMessages($t, $lines);
-
-        $input = '';
+        $input = 'r';
         while ($input !== 'q') {
             if ($input == 'r') {
                 $lines = $logFile->getLastXLines(static::NUMBER_OF_LINES_TO_READ);
@@ -69,6 +69,7 @@ class Application
 
     public static function showPrompt(Terminal $t)
     {
+        $t->pl(str_repeat('_', mb_strlen(static::PROMPT)));
         $t->pl(static::PROMPT);
     }
 
@@ -77,7 +78,7 @@ class Application
         $logMessage = new LogMessage($line);
         $t->pl($logMessage->getTimestamp()->format(static::TIMESTAMP_FORMAT));
         $t->pl($logMessage->getErrorType());
-        $msg = substr($logMessage->getMessage(), mb_strlen($logMessage->getErrorType()));
+        $msg = substr($logMessage->getMessage(), mb_strlen($logMessage->getErrorType()) + (in_array($logMessage->getErrorType(), ['Error-Code', '']) ? 0 : 3));
 
         $arrMessage = explode("\\n", $msg);
         foreach ($arrMessage as $msgLine) {
@@ -95,5 +96,10 @@ class Application
     public static function showCommandNotFoundNotification(Terminal $t)
     {
         $t->pl(self::COMMAND_NOT_FOUND);
+    }
+
+    public static function showHelpMessage(Terminal $t)
+    {
+        $t->pl(static::HELP);
     }
 }
