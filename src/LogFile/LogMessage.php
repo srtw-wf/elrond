@@ -4,7 +4,7 @@ namespace Elrond\LogFile;
 
 use DateTimeImmutable;
 
-class LogMessage
+class LogMessage implements LogMessageInterface
 {
     private $timestamp;
 
@@ -27,20 +27,20 @@ class LogMessage
 
     }
 
-    private function setTimestamp(string $dateTime): self
+    private function setTimestamp(?string $dateTime = null): self
     {
         $this->timestamp = new DateTimeImmutable($dateTime);
         return $this;
     }
 
-    public function getTimestamp(): DateTimeImmutable
+    public function getTimestamp(): ?DateTimeImmutable
     {
         return $this->timestamp;
     }
 
-    private function setMessage(string $message): self
+    private function setMessage(?string $message = null): self
     {
-        $this->message = $message;
+        $this->message = $message == null ? '' : $message;
 
         return $this;
     }
